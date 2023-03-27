@@ -1,0 +1,119 @@
+############################################################################################
+
+Individual-based simulation of evolutionary divergence under Fisher's geometrical model,
+in a range of population genetic regimes
+
+############################################################################################
+
+For more details see: 
+"How does the mode of evolutionary divergence affect reproductive isolation?"
+De Sanctis B, Schneemann H, Welch JJ. 2022. (doi:10.1101/2022.03.08.483443)
+
+and
+
+"The geometry and genetics of hybridization" , Appendix 2.
+Schneemann H, Sanctis BD, Roze D, Bierne N, Welch JJ. 2020. Evolution (doi:10.1101/862235)
+
+For questions, email: hilde.schneemann@evobio.eu
+
+############################################################################################
+########                 FILE DESCRIPTION                                           ########
+############################################################################################
+
+fichiers.cpp:
+Functions to open input and output files, read parameter values from input file and
+write them in output file.
+
+fisher.h:
+Header file: definitions of global variables, function prototypes
+
+functions.cpp:
+Functions used in recursion script to generate mutation coefficients
+
+main.cpp:
+main() function: reads parameter values in input file, and runs the simulation.
+
+ranbin.cpp:
+Functions to sample from Poisson, binomial and normal distributions (from Numerical Recipes in C)
+
+rec_infSites.cpp:
+Recombination functions, simulating either a single chromosome with crossing-over or independent segregation of all loci
+
+recursion_allopatry.cpp:
+Recursion function for individual-based simulation of evolutionary divergence for a single population under Fisher's geometrical model
+
+############################################################################################
+########                 COMPILATION                                                ########
+############################################################################################
+
+
+Before compilation, the boost library must be installed. (https://www.boost.org/)
+In addition, the following header file must be downloaded and placed in the simulation code directory:
+https://github.com/hildeschneemann/Fisher_divergence_simulation/blob/main/allopatry/MersenneTwister.h
+
+To compile, make sure all *.cpp files and header files (*.h) are present in the same directory and run:
+
+g++ -std=c++11 *.cpp -I/usr/local/include/boost
+
+############################################################################################
+########                 RUNTIME                                                    ########
+############################################################################################
+
+To run:
+
+./a.out inputfile.txt
+
+
+############################################################################################
+########                 INPUTFILES                                                 ########
+############################################################################################
+
+The inputfile needs to specify the following parameters (see example inputfile.txt)
+
+Input parameters:
+
+** Population genetics parameters
+N: size of the population; Number of diploid individuals
+L: genome map length in Morgans (mean nb of cross-overs per meiosis); set to -1 for free recombination
+U: mutation rate per diploid genome
+
+** Fitness landscape
+k: curvature of fitness function (set to 2 to match results in paper)
+n: number of phenotypic traits
+
+** Distribution of mutation effects
+M: Flag for mutational effect model: 1 "bottom up" i.e. multivariate normal; 0 "top down" i.e. exponential
+s: The mean selection coefficient for random mutations in an optimal genotype
+q: mean phenotypic dominance effect (set to 1/2 in published work)
+F: inflation of variance of distribution of phenotypic dominance (set to -1 for a uniform distribution, 123 for 'realistic' distribution, and -999 for uniform "per-mutation" dominance)
+
+** Demographic/environmental change
+E: Flag for environmental change (i.e. position of the optimum):
+	-1 (optimum is fixed to match ancestral state + initial bottleneck) [not used in this paper]
+	0  (optimum is fixed to match ancestral state)
+	1  (oscillating over time) [not used in this paper]
+	2  (fixed at 1, away from ancestral state)
+
+
+** Simulation parameters
+D:    Stop simulation after D fixations have occurred.
+reps: Number of times simulation should be repeated
+
+
+
+############################################################################################
+########                 OUTPUTFILE                                                 ########
+############################################################################################
+
+For each replicate, one outputfile will be produced called "res_*.txt".
+This file lists the details of each mutation that has fixed, in the order in which they became fixed.
+
+It has the following columns:
+position: position of the fixed mutation in the genome (between 0 and 1; infinite-sites model)
+mut_time: generation in which the mutation arose
+fix_time: generation in which the mutation became fixed
+opt_dist: position of the optimum for trait 1
+
+for each of the n traits
+mut_effect: mutational effect size on this trait
+dom: dominance coefficient for this trait
